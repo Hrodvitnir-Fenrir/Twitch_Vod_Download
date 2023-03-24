@@ -1,0 +1,24 @@
+{
+  "name": "ts_chunk_dl_2.0",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "my-app": "index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node .",
+    "build": "npx pkg index.js --targets win --output dlVod.exe"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "child_process": "^1.0.2",
+    "ora": "^5.4.1",
+    "pkg": "^5.8.1",
+    "rimraf": "^4.4.0"
+  }
+}
