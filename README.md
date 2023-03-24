@@ -8,7 +8,7 @@ This is a command-line tool to download Twitch VODs, including sub-only VODs.
 3. Copy the link of the image associated with the VOD from the "Videos" tab.
 4. Paste the link into the `VodDownloader.exe` software.
 
-### Known issues
+## Known issues
 
 - `VodDownloader.exe` may be detected as a virus, but it is not.[^1]
 - On Windows 10, it is not recommended to run `VodDownloader.exe` directly, as it may pause. It is therefore preferable to launch it with the Windows Terminal.
@@ -18,6 +18,6 @@ This is a command-line tool to download Twitch VODs, including sub-only VODs.
 
 [^1]: This issue is plain to be fix. The others do not depend of me.
 
-## Bonus feature
+### Bonus feature
 
 `VodDownloader.exe` also allows you to download sub-only VODs.
