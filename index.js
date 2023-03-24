@@ -1,8 +1,8 @@
 const readline = require('readline');
 const { exec } = require('child_process');
 const axios = require("axios");
-const ora = require('ora');
 const fs = require("fs");
+const Spinnies = require("spinnies");
 fs.mkdirSync('downloads', { recursive: true });
 const list = fs.createWriteStream("downloads/list.txt", {
     flags: "a"
@@ -11,6 +11,11 @@ const list = fs.createWriteStream("downloads/list.txt", {
 const regex = /[a-z0-9]+_[a-z0-9]+_[a-z0-9]+_[a-z0-9]+/;
 let dlLink;
 let i = 0;
+let stop = false;
+let instance = 0;
+
+const infoSpin = new Spinnies({ disableSpins: true });
+const chunkSpin = new Spinnies();
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -22,9 +27,7 @@ function askUrl() {
         let match = url.match(regex);
         if (match) {
             dlLink = `https://dgeft87wbj63p.cloudfront.net/${match[0]}/chunked/`;
-            console.clear();
-            console.log(`VOD Url:\n${dlLink}`);
-            await oldDlChunk();
+            await limiter();
         } else {
             console.log("Invalid URL");
             askUrl();
@@ -34,48 +37,66 @@ function askUrl() {
 
 askUrl();
 
-async function oldDlChunk() {
+async function limiter() {
+    infoSpin.add("url", { text: `🔗 Vod url: ${dlLink}` });
+    infoSpin.add("time", { text: `🕓 Actual time of the VOD: ${formatTime(i)}` });
+    let loop = setInterval(() => {
+        if (!stop) {
+            if (instance < 3) {
+                instance++;
+                dlChunk(i);
+                i++;
+                console.clear();
+                infoSpin.update("time", { text: `🕓 Actual time of the VOD: ${formatTime(i)}` });
+            }
+        } else {
+            clearInterval(loop);
+            chunkSpin.stopAll('stopped');
+            console.log("Download compleate\nConcatenate all part...");
+            setTimeout(() => {
+                ffmpegConcat();
+            }, 5000);
+        }
+    }, 1000);
+}
+
+async function dlChunk(j) {
     try {
-        console.clear();
-        console.log("VOD Url: " + dlLink);
-        console.log("Actual time of the VOD: " + formatTime(i));
-        const spinner = ora({
-            spinner: "simpleDotsScrolling",
-            color: "blue",
-            text: `Downloading chunk ${i}`
-        }).start();
-        const response = await axios.get(`${dlLink}${i}.ts`, { responseType: "stream" });
-        const writer = fs.createWriteStream(`downloads/${i}.ts`);
+        chunkSpin.add(`chunk${j}`, { text: `Downloading chunk ${j} ...` });
+        await list.write(`file '${j}.ts' \n`);
+        const response = await axios.get(`${dlLink}${j}.ts`, { responseType: "stream" });
+        const writer = fs.createWriteStream(`downloads/${j}.ts`);
         response.data.pipe(writer);
         await new Promise((resolve, reject) => {
             writer.on("finish", resolve);
             writer.on("error", reject);
         });
-        await list.write(`file '${i}.ts' \n`);
-        spinner.succeed(`Downloaded chunk ${i}`);
-        i++;
-        await oldDlChunk();
+        await instance--;
+        await chunkSpin.remove(`chunk${j}`);
     } catch (error) {
-        console.clear();
-        console.log("VOD Url: " + dlLink);
-        console.log("Actual time of the VOD: " + formatTime(i));
-        console.log(`All downloads are done, total: ${i} chunk`);
-        console.log("Concat all part...")
-        ffmpegConcat();
+        stop = true;
     }
+}
+
+function formatTime(numChunks) {
+    const totalSeconds = numChunks * 10;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 async function ffmpegConcat() {
     return new Promise((resolve, reject) => {
         exec(
-            "ffmpeg -f concat -safe 0 -i downloads/list.txt -c copy Vod.mp4",
+            `ffmpeg -f concat -safe 0 -i downloads/list.txt -c copy Vod-${dlLink.match(regex)}.mp4`,
             (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Error concatenating files with ffmpeg: ${error}`);
                     reject(error);
                 }
                 // console.log(`ffmpeg stdout: ${stdout}`);
-                console.log(`ffmpeg stderr: ${stderr}`);
+                // console.log(`ffmpeg stderr: ${stderr}`);
                 console.clear();
                 console.log("Concatenation finished");
                 resolve();
@@ -86,8 +107,9 @@ async function ffmpegConcat() {
                         if (err) {
                             console.log(err)
                         } else {
-                            console.log("temp folder deleted successfully");
-                            console.log(`Your \"Vod.mp4\" is available \nTime: ~${formatTime(i)}\n${i} Chunk`);
+                            console.clear()
+                            console.log("Temp folder deleted successfully");
+                            console.log(`Your \"Vod.mp4\" is available \nTime: ~ ${formatTime(i)}\n${i} Chunk`);
                         }
                     });
                 }, 5000);
@@ -96,10 +118,4 @@ async function ffmpegConcat() {
     });
 }
 
-function formatTime(numChunks) {
-    const totalSeconds = numChunks * 10;
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
+
