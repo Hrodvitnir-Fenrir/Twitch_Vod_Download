@@ -10,13 +10,13 @@ This is a command-line tool to download Twitch VODs, including sub-only VODs.
 
 ## Known issues
 
-- `VodDownloader.exe` may be detected as a virus, but it is not.[^1]
+- `VodDownloader.exe` may be detected as a virus, but it is not. (If you not trust, clone the repo and use .js and not the .exe)
 - On Windows 10, it is not recommended to run `VodDownloader.exe` directly, as it may pause. It is therefore preferable to launch it with the Windows Terminal.
 - There may be a few seconds missing at the end of the VOD.
 - The VOD may not be fully downloaded.
-- `VodDownloader.exe` does not have an icon.[^1]
+- `VodDownloader.exe` does not have an icon.
 
-[^1]: This issue is plain to be fix. The others do not depend of me.
+This issues not really depend of me, not plain to fix it atm.
 
 ### Bonus feature
 
