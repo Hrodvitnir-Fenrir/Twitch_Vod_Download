@@ -16,7 +16,7 @@ You need to have install FFMPEG on your computer for concat the vod: [easy tutor
 - `VodDownloader.exe` may be detected as a virus, but it is not. (If you not trust, clone the repo and use .js and not the .exe)
 - On Windows 10, it is not recommended to run `VodDownloader.exe` directly, as it may pause. It is therefore preferable to launch it with the Windows Terminal.
 - There may be a few seconds missing at the end of the VOD.
-- The VOD may not be fully downloaded.
+- On some VOD, they are not fully downloaded.
 
 [^1]: This issues not really depend of me, not plain to fix it atm.
 
