@@ -2,6 +2,9 @@
 
 This is a command-line tool to download Twitch VODs, including sub-only VODs.
 
+# Requirements
+You need to have install FFMPEG on your computer for concat the vod: [easy tutorial](https://www.wikihow.com/Install-FFmpeg-on-Windows)
+
 ## How to use
 1. Download the latest version of `VodDownloader.exe` from the [releases page](https://github.com/Hrodvitnir-Fenrir/Twitch_Vod_Download/releases).
 2. Go to the [Twitch](https://www.twitch.tv/) page of the streamer whose VOD you want to download.
