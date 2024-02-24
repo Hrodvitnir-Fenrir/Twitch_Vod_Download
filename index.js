@@ -27,6 +27,8 @@ function askUrl() {
         let match = url.match(regex);
         if (match) {
             dlLink = `https://dgeft87wbj63p.cloudfront.net/${match[0]}/chunked/`;
+            infoSpin.add("url", { text: `🔗 Vod url: ${dlLink}` });
+            infoSpin.add("time", { text: `🕓 Actual time of the VOD: ${formatTime(i)}` });
             await limiter();
         } else {
             console.log("Invalid URL");
@@ -38,26 +40,29 @@ function askUrl() {
 askUrl();
 
 async function limiter() {
-    infoSpin.add("url", { text: `🔗 Vod url: ${dlLink}` });
-    infoSpin.add("time", { text: `🕓 Actual time of the VOD: ${formatTime(i)}` });
-    let loop = setInterval(() => {
-        if (!stop) {
-            if (instance < 3) {
-                instance++;
-                dlChunk(i);
-                i++;
-                console.clear();
-                infoSpin.update("time", { text: `🕓 Actual time of the VOD: ${formatTime(i)}` });
-            }
-        } else {
-            clearInterval(loop);
-            chunkSpin.stopAll('stopped');
-            console.log("Download compleate\nConcatenate all part...");
-            setTimeout(() => {
-                ffmpegConcat();
-            }, 5000);
-        }
-    }, 1000);
+    if (i == 0) {
+        dlChunk(i);
+        i++;
+        dlChunk(i);
+        i++;
+        dlChunk(i);
+    } else if (!stop && i != 0) {
+        console.clear();
+        infoSpin.update("time", { text: `🕓 Actual time of the VOD: ${formatTime(i)}` });
+        i++;
+        dlChunk(i);
+    } else if (stop) {
+        console.log("stop");
+        chunkSpin.stopAll('stopped');
+        console.log("Download compleate\nConcatenate all part...");
+        setTimeout(() => {
+            ffmpegConcat();
+        }, 5000);
+    }
+}
+
+async function updateVisual() {
+
 }
 
 async function dlChunk(j) {
@@ -73,7 +78,9 @@ async function dlChunk(j) {
         });
         await instance--;
         await chunkSpin.remove(`chunk${j}`);
+        limiter();
     } catch (error) {
+        console.log(error)
         stop = true;
     }
 }
