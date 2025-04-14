@@ -1,3 +1,7 @@
+> [!CAUTION]
+> Deprecated repo, please use [this new system](https://github.com/Hrodvitnir-Fenrir/Twitch_Vod_Player)
+>
+
 # Twitch VOD Downloader
 
 This is a command-line tool to download Twitch VODs, including sub-only VODs.
